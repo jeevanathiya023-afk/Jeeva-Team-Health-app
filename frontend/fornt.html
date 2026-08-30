@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SeniorEase — Accessible Web Portal for Elderly (60+)</title>
+  <meta name="description" content="SeniorEase is an accessible, human-centric web portal tailored for seniors aged 60+ featuring large controls, voice assistance, English and Tamil support, medicine tracking, reminders, and emergency help.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&family=Mukta+Malar:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Ambient Glowing Background Orbs -->
+  <div class="ambient-orb orb-1" aria-hidden="true"></div>
+  <div class="ambient-orb orb-2" aria-hidden="true"></div>
+  <div class="ambient-orb orb-3" aria-hidden="true"></div>
+
+  <!-- ==========================================================================
+       TOP ACCESSIBILITY TOOLBAR (Always Sticky)
+       ========================================================================== -->
+  <header class="a11y-toolbar" role="banner">
+    <div class="a11y-brand" onclick="SeniorEaseApp.navTo('home')" title="SeniorEase Home">
+      <span class="a11y-brand-icon" aria-hidden="true">🌸</span>
+      <span data-i18n="brand_name">SeniorEase</span>
+    </div>
+
+    <div class="a11y-tools-group" role="toolbar" aria-label="Quick accessibility controls">
+      <!-- Quick Text Size Scaling -->
+      <button class="tool-btn" id="btnFontNormal" onclick="SeniorEaseA11y.setFontScale(1.0)" aria-label="Normal text size" title="Normal text (100%)">
+        <span aria-hidden="true">A</span> <span data-i18n="font_normal">Normal</span>
+      </button>
+      <button class="tool-btn" id="btnFontLarge" onclick="SeniorEaseA11y.setFontScale(1.2)" aria-label="Large text size" title="Large text (120%)">
+        <span aria-hidden="true" style="font-size: 1.15em;">A+</span> <span data-i18n="font_large">Large</span>
+      </button>
+      <button class="tool-btn" id="btnFontXLarge" onclick="SeniorEaseA11y.setFontScale(1.4)" aria-label="Extra large text size" title="Extra large text (140%)">
+        <span aria-hidden="true" style="font-size: 1.3em; font-weight: 900;">A++</span> <span data-i18n="font_xlarge">Huge</span>
+      </button>
+
+      <!-- High Contrast Toggle -->
+      <button class="tool-btn" id="btnContrast" onclick="SeniorEaseA11y.toggleTheme()" aria-label="Toggle high contrast black and yellow mode" title="High Contrast Mode">
+        <span aria-hidden="true">🌓</span> <span id="contrastLabel" data-i18n="contrast_btn">High Contrast</span>
+      </button>
+
+      <!-- Voice Guidance Toggle -->
+      <button class="tool-btn active" id="btnVoiceToggle" onclick="SeniorEaseA11y.toggleVoiceGuide()" aria-label="Toggle voice guidance" title="Voice assistance on/off">
+        <span aria-hidden="true" id="voiceGuideIcon">🔊</span> <span id="voiceGuideLabel" data-i18n="voice_guide_btn">Voice Guide: ON</span>
+      </button>
+
+      <!-- Language Switcher: English / Tamil -->
+      <button class="tool-btn" id="btnLang" onclick="SeniorEaseA11y.toggleLanguage()" aria-label="Switch language between English and Tamil" title="Change Language">
+        <span aria-hidden="true">🌐</span> <span id="langLabel">தமிழ் (Tamil)</span>
+      </button>
+
+      <!-- Quick Accessibility Settings -->
+      <button class="tool-btn" onclick="SeniorEaseApp.navTo('settings')" aria-label="Open full accessibility settings" title="Settings">
+        <span aria-hidden="true">⚙️</span> <span data-i18n="settings_btn">Settings</span>
+      </button>
+
+      <!-- Quick Emergency SOS Button -->
+      <button class="tool-btn sos-quick-btn" onclick="SeniorEaseApp.navTo('emergency')" aria-label="Emergency SOS help" title="Emergency Help">
+        <span aria-hidden="true">🚨</span> <span data-i18n="sos_btn">SOS HELP</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ==========================================================================
+       MAIN VIEW CONTAINER
+       ========================================================================== -->
+  <main class="app-container" id="mainContent" role="main">
+
+    <!-- Active Breadcrumb Bar -->
+    <nav class="nav-breadcrumb-bar" id="navBreadcrumb" style="display: none;" aria-label="Breadcrumb navigation">
+      <button class="nav-back-btn" onclick="SeniorEaseApp.navTo('home')" aria-label="Back to home screen">
+        <span aria-hidden="true">⬅️</span> <span data-i18n="back_to_home">Back to Home</span>
+      </button>
+      <div class="current-page-badge" id="currentPageTitle">Page Title</div>
+      <button class="tool-btn" onclick="SeniorEaseVoice.speakCurrentSection()" aria-label="Read this page out loud">
+        <span aria-hidden="true">🔊</span> <span data-i18n="read_page">Read Page</span>
+      </button>
+    </nav>
+
+    <!-- ========================================================================
+         1. HOME SCREEN (Simple, Uncluttered, 7 Giant Action Cards)
+         ======================================================================== -->
+    <section class="app-section active" id="secHome" aria-labelledby="homeGreeting">
+      <!-- Greeting Banner -->
+      <div class="header-banner">
+        <div class="banner-text">
+          <h1 id="homeGreeting" data-i18n="home_greeting">Good Morning, Respected Elder! 🌸</h1>
+          <p data-i18n="home_subtitle">How can SeniorEase help you today? Tap any large button below or speak to us.</p>
+        </div>
+        <div class="banner-actions">
+          <button class="voice-speak-hero-btn" onclick="SeniorEaseVoice.speakGreeting()" aria-label="Listen to spoken greeting and instructions">
+            <span aria-hidden="true">🎙️</span> <span data-i18n="listen_instruction">Listen Instructions</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Pending Dose Alert Card -->
+      <div class="reminder-alert-card" id="homePendingBanner" role="region" aria-label="Upcoming Medicine Alert">
+        <div class="reminder-alert-left">
+          <span class="icon" aria-hidden="true">🔔</span>
+          <div>
+            <strong style="font-size: var(--font-size-lg); display: block;" data-i18n="next_dose_alert">Upcoming Dose: Blood Pressure Tablet</strong>
+            <span style="font-size: var(--font-size-base);" data-i18n="dose_time_prompt">Scheduled for today at 2:00 PM (After Lunch)</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn-action-primary" style="background: linear-gradient(135deg, #059669 0%, #047857 100%); padding: 10px 22px;" onclick="SeniorEaseMedicines.setStatus(1, 'taken'); document.getElementById('homePendingBanner').style.display='none';">
+            ✅ <span data-i18n="mark_taken_btn_txt">I Took It</span>
+          </button>
+          <button class="btn-action-secondary" onclick="SeniorEaseApp.navTo('medicines')">
+            <span data-i18n="view_all_meds">View Medicines</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 7 Giant Action Cards Grid -->
+      <div class="home-grid" role="list">
+
+        <!-- Tile 1: Healthcare & Doctors -->
+        <article class="action-card card-health" role="listitem">
+          <div class="action-card-header">
+            <div class="action-icon-circle" aria-hidden="true">🏥</div>
+            <button class="tts-card-btn" onclick="SeniorEaseVoice.speakText('Healthcare: Find specialist doctors, nearby hospitals, and book clinic visits.')" aria-label="Read Healthcare description" title="Read aloud">🔊</button>
+          </div>
+          <div class="action-card-content">
+            <h2 data-i18n="card_health_title">Healthcare & Doctors</h2>
+            <p data-i18n="card_health_desc">Find specialist doctors, nearby hospitals, and book clinic visits.</p>
+          </div>
+          <button class="card-open-btn" onclick="SeniorEaseApp.navTo('health')" aria-label="Open Healthcare and Doctors">
+            <span data-i18n="open_health">Open Doctors & Hospitals</span> ➔
+          </button>
+        </article>
+
+        <!-- Tile 2: My Medicines -->
+        <article class="action-card card-medicine" role="listitem">
+          <div class="action-card-header">
+            <div class="action-icon-circle" aria-hidden="true">💊</div>
+            <button class="tts-card-btn" onclick="SeniorEaseVoice.speakText('My Medicines: Check your daily tablets, dosage times, and mark pills as taken.')" aria-label="Read Medicines description" title="Read aloud">🔊</button>
+          </div>
+          <div class="action-card-content">
+            <h2 data-i18n="card_med_title">My Medicines</h2>
+            <p data-i18n="card_med_desc">Check your daily tablets, dosage times, and mark pills as taken.</p>
+          </div>
+          <button class="card-open-btn" onclick="SeniorEaseApp.navTo('medicines')" aria-label="Open My Medicines">
+            <span data-i18n="open_med">Open My Medicines</span> ➔
+          </button>
+        </article>
+
+        <!-- Tile 3: Reminders & Schedule -->
+        <article class="action-card card-reminder" role="listitem">
+          <div class="action-card-header">
+            <div class="action-icon-circle" aria-hidden="true">⏰</div>
+            <button class="tts-card-btn" onclick="SeniorEaseVoice.speakText('Reminders: Doctor visits, health checkups, and gentle sound alarms.')" aria-label="Read Reminders description" title="Read aloud">🔊</button>
+          </div>
+          <div class="action-card-content">
+            <h2 data-i18n="card_remind_title">Reminders & Schedule</h2>
+            <p data-i18n="card_remind_desc">Doctor visits, health checkups, and gentle sound alarms.</p>
+          </div>
+          <button class="card-open-btn" onclick="SeniorEaseApp.navTo('reminders')" aria-label="Open Reminders and Schedule">
+            <span data-i18n="open_remind">Open Reminders</span> ➔
+          </button>
+        </article>
+
+        <!-- Tile 4: Family & Trusted Contacts -->
+        <article class="action-card card-family" role="listitem">
+          <div class="action-card-header">
+            <div class="action-icon-circle" aria-hidden="true">👨‍👩‍👧</div>
+            <button class="tts-card-btn" onclick="SeniorEaseVoice.speakText('Family Contacts: One-tap direct calling and quick messages to loved ones.')" aria-label="Read Family Contacts description" title="Read aloud">🔊</button>
+          </div>
+          <div class="action-card-content">
+            <h2 data-i18n="card_family_title">Family & Contacts</h2>
+            <p data-i18n="card_family_desc">One-tap direct calling and quick messages to loved ones.</p>
+          </div>
+          <button class="card-open-btn" onclick="SeniorEaseApp.navTo('family')" aria-label="Open Family and Contacts">
+            <span data-i18n="open_family">Open Family Contacts</span> ➔
+          </button>
+        </article>
+
+        <!-- Tile 5: Voice Assistant -->
+        <article class="action-card card-voice" role="listitem">
+          <div class="action-card-header">
+            <div class="action-icon-circle" aria-hidden="true">🎙️</div>
+            <button class="tts-card-btn" onclick="SeniorEaseVoice.speakText('Voice Assistant: Speak instead of typing. Say Doctor, Medicines, or Emergency.')" aria-label="Read Voice Assistant description" title="Read aloud">🔊</button>
+          </div>
+          <div class="action-card-content">
+            <h2 data-i18n="card_voice_title">Voice Assistant</h2>
+            <p data-i18n="card_voice_desc">Speak instead of typing. Say "Doctor", "Medicines", or "Emergency".</p>
+          </div>
+          <button class="card-open-btn" onclick="SeniorEaseApp.navTo('voice')" aria-label="Open Voice Assistant">
+            <span data-i18n="open_voice">Speak to Navigate</span> ➔
+          </button>
+        </article>
+
+        <!-- Tile 6: Accessibility Settings -->
+        <article class="action-card card-settings" role="listitem">
+          <div class="action-card-header">
+            <div class="action-icon-circle" aria-hidden="true">⚙️</div>
+            <button class="tts-card-btn" onclick="SeniorEaseVoice.speakText('Accessibility Settings: Adjust text size, high contrast mode, voice assistance, and language.')" aria-label="Read Settings description" title="Read aloud">🔊</button>
+          </div>
+          <div class="action-card-content">
+            <h2 data-i18n="card_settings_title">Accessibility Settings</h2>
+            <p data-i18n="card_settings_desc">Adjust text size, high contrast mode, voice assistance, and language.</p>
+          </div>
+          <button class="card-open-btn" onclick="SeniorEaseApp.navTo('settings')" aria-label="Open Accessibility Settings">
+            <span data-i18n="open_settings">Open Settings</span> ➔
+          </button>
+        </article>
+
+        <!-- Tile 7: Emergency SOS Help -->
+        <article class="action-card card-emergency" role="listitem">
+          <div class="action-card-header">
+            <div class="action-icon-circle" aria-hidden="true">🚨</div>
+            <button class="tts-card-btn" onclick="SeniorEaseVoice.speakText('Emergency SOS: Immediate 1-tap call to 108 Ambulance, 112 Police, and Family alert.')" aria-label="Read Emergency description" title="Read aloud">🔊</button>
+          </div>
+          <div class="action-card-content">
+            <h2 style="color: var(--emergency);" data-i18n="card_sos_title">Emergency SOS Help</h2>
+            <p data-i18n="card_sos_desc">Immediate 1-tap call to 108 Ambulance, 112 Police & Family alert.</p>
+          </div>
+          <button class="card-open-btn" onclick="SeniorEaseApp.navTo('emergency')" aria-label="Trigger Emergency SOS">
+            🚨 <span data-i18n="open_sos">GET EMERGENCY HELP</span> 🚨
+          </button>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         2. HEALTHCARE & DOCTORS SECTION
+         ======================================================================== -->
+    <section class="app-section" id="secHealth" aria-labelledby="healthHeading">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span style="font-size: 38px;" aria-hidden="true">🏥</span>
+          <div>
+            <h2 id="healthHeading" data-i18n="health_sec_title">Healthcare & Doctors</h2>
+            <p class="section-desc" data-i18n="health_sec_desc">Find trusted doctors, nearby hospitals, and schedule visits without complicated forms.</p>
+          </div>
+        </div>
+        <button class="btn-action-primary" style="padding: 12px 24px;" onclick="SeniorEaseApp.openBookModal()" data-i18n="btn_book_appt">
+          📅 <span>Book New Appointment</span>
+        </button>
+      </div>
+
+      <!-- Filter Tabs -->
+      <div class="tab-pills" role="tablist" aria-label="Healthcare categories">
+        <button class="tab-pill active" onclick="SeniorEaseApp.filterHealthcare('all', this)" role="tab" aria-selected="true" data-i18n="tab_all_doctors">🩺 All Doctors</button>
+        <button class="tab-pill" onclick="SeniorEaseApp.filterHealthcare('general', this)" role="tab" aria-selected="false" data-i18n="tab_general_physician">👨‍⚕️ General Physician</button>
+        <button class="tab-pill" onclick="SeniorEaseApp.filterHealthcare('heart', this)" role="tab" aria-selected="false" data-i18n="tab_cardiologist">❤️ Heart Specialist</button>
+        <button class="tab-pill" onclick="SeniorEaseApp.filterHealthcare('eye', this)" role="tab" aria-selected="false" data-i18n="tab_eye_specialist">👁️ Eye Specialist</button>
+        <button class="tab-pill" onclick="SeniorEaseApp.filterHealthcare('hospitals', this)" role="tab" aria-selected="false" data-i18n="tab_hospitals">🏨 Nearby Hospitals</button>
+      </div>
+
+      <!-- Healthcare Directory Grid -->
+      <div class="items-grid" id="healthDirectoryGrid" role="list"></div>
+
+      <!-- Health Information Tips Card for Seniors -->
+      <div class="settings-card" style="margin-top: 32px; border-left: 8px solid var(--health);">
+        <h3 data-i18n="health_info_title">💡 Simple Health Tips for Seniors</h3>
+        <ul style="list-style-type: none; display: flex; flex-direction: column; gap: 12px; font-size: var(--font-size-base); font-weight: 600; margin-top: 12px;">
+          <li data-i18n="health_tip_1">💧 Drink 6 to 8 glasses of warm water every day to stay active.</li>
+          <li data-i18n="health_tip_2">🚶 Take a gentle 15-minute morning walk after light breakfast.</li>
+          <li data-i18n="health_tip_3">👁️ Blink and rest your eyes every 20 minutes when reading.</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         3. MY MEDICINES SECTION
+         ======================================================================== -->
+    <section class="app-section" id="secMedicines" aria-labelledby="medHeading">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span style="font-size: 38px;" aria-hidden="true">💊</span>
+          <div>
+            <h2 id="medHeading" data-i18n="med_sec_title">My Medicines & Daily Schedule</h2>
+            <p class="section-desc" data-i18n="med_sec_desc">Track your daily medicines easily. Tap 'Mark Taken' when you swallow your tablet.</p>
+          </div>
+        </div>
+        <button class="btn-action-primary" style="padding: 12px 24px; background: linear-gradient(135deg, var(--medicine) 0%, #047857 100%);" onclick="SeniorEaseApp.openModal('modalAddMed')" data-i18n="btn_add_med">
+          ➕ <span>Add New Medicine</span>
+        </button>
+      </div>
+
+      <!-- Time of Day Filter -->
+      <div class="tab-pills" role="tablist">
+        <button class="tab-pill active" onclick="SeniorEaseMedicines.filter('all', this)" role="tab" data-i18n="tab_all_day">☀️ All Day</button>
+        <button class="tab-pill" onclick="SeniorEaseMedicines.filter('morning', this)" role="tab" data-i18n="tab_morning">🌅 Morning (Breakfast)</button>
+        <button class="tab-pill" onclick="SeniorEaseMedicines.filter('afternoon', this)" role="tab" data-i18n="tab_afternoon">☀️ Afternoon (Lunch)</button>
+        <button class="tab-pill" onclick="SeniorEaseMedicines.filter('night', this)" role="tab" data-i18n="tab_night">🌙 Night (Dinner)</button>
+      </div>
+
+      <!-- Medicines Grid -->
+      <div class="items-grid" id="medicinesGrid" role="list"></div>
+    </section>
+
+    <!-- ========================================================================
+         4. REMINDERS & SCHEDULE SECTION
+         ======================================================================== -->
+    <section class="app-section" id="secReminders" aria-labelledby="remindHeading">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span style="font-size: 38px;" aria-hidden="true">⏰</span>
+          <div>
+            <h2 id="remindHeading" data-i18n="remind_sec_title">Reminders & Sound Alarms</h2>
+            <p class="section-desc" data-i18n="remind_sec_desc">Never miss your doctor appointment, medicine time, or family event.</p>
+          </div>
+        </div>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button class="btn-action-secondary" onclick="SeniorEaseReminders.playChime()" title="Test gentle sound chime" data-i18n="btn_test_alarm">
+            🔔 <span>Test Sound Chime</span>
+          </button>
+          <button class="btn-action-secondary" onclick="SeniorEaseReminders.requestBrowserNotifications()" title="Enable push notifications" data-i18n="btn_browser_notif">
+            📲 <span>Enable Push Notifications</span>
+          </button>
+          <button class="btn-action-primary" style="background: linear-gradient(135deg, var(--reminder) 0%, #B45309 100%);" onclick="SeniorEaseApp.openModal('modalAddReminder')" data-i18n="btn_add_reminder">
+            ➕ <span>Add Reminder</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="items-grid" id="remindersGrid" role="list"></div>
+    </section>
+
+    <!-- ========================================================================
+         5. FAMILY & TRUSTED CONTACTS SECTION
+         ======================================================================== -->
+    <section class="app-section" id="secFamily" aria-labelledby="familyHeading">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span style="font-size: 38px;" aria-hidden="true">👨‍👩‍👧</span>
+          <div>
+            <h2 id="familyHeading" data-i18n="family_sec_title">Family & Caregiver Contacts</h2>
+            <p class="section-desc" data-i18n="family_sec_desc">Direct one-tap calling and instant quick messages to your loved ones.</p>
+          </div>
+        </div>
+        <button class="btn-action-primary" style="background: linear-gradient(135deg, var(--family) 0%, #6D28D9 100%);" onclick="SeniorEaseApp.openModal('modalAddContact')" data-i18n="btn_add_contact">
+          ➕ <span>Add New Contact</span>
+        </button>
+      </div>
+
+      <div class="items-grid" id="familyContactsGrid" role="list"></div>
+    </section>
+
+    <!-- ========================================================================
+         6. VOICE ASSISTANT SECTION
+         ======================================================================== -->
+    <section class="app-section" id="secVoice" aria-labelledby="voiceHeading">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span style="font-size: 38px;" aria-hidden="true">🎙️</span>
+          <div>
+            <h2 id="voiceHeading" data-i18n="voice_sec_title">Voice Assistant (Speak to Navigate)</h2>
+            <p class="section-desc" data-i18n="voice_sec_desc">No typing required. Tap the large microphone button and speak clearly.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="voice-console-card">
+        <h3 style="font-size: var(--font-size-xl); margin-bottom: 10px;" data-i18n="voice_tap_prompt">Tap the button and speak your request</h3>
+        <p style="color: var(--text-muted); font-size: var(--font-size-base); font-weight: 600;" data-i18n="voice_lang_hint">Supports both English and தமிழ் (Tamil) speech recognition</p>
+
+        <!-- Big Mic Trigger -->
+        <button class="voice-mic-trigger" id="voiceMicBtn" onclick="SeniorEaseVoice.toggleSpeechRecognition()" aria-label="Start Voice Listening" title="Click to Speak">
+          <span aria-hidden="true">🎤</span>
+        </button>
+
+        <div class="voice-status-text" id="voiceStatusText" data-i18n="voice_status_ready">
+          Ready to listen. Tap the microphone above!
+        </div>
+
+        <div style="margin-top: 28px;">
+          <strong style="font-size: var(--font-size-lg); display: block; margin-bottom: 12px;" data-i18n="voice_try_saying">Or click any quick command below:</strong>
+          <div class="voice-command-chips">
+            <button class="voice-chip" onclick="SeniorEaseVoice.processVoiceCommand('doctor')" data-i18n="cmd_doctor">"Open Doctors"</button>
+            <button class="voice-chip" onclick="SeniorEaseVoice.processVoiceCommand('medicine')" data-i18n="cmd_medicine">"My Medicines"</button>
+            <button class="voice-chip" onclick="SeniorEaseVoice.processVoiceCommand('reminder')" data-i18n="cmd_reminder">"Show Reminders"</button>
+            <button class="voice-chip" onclick="SeniorEaseVoice.processVoiceCommand('emergency')" data-i18n="cmd_emergency">"Emergency Help"</button>
+            <button class="voice-chip" onclick="SeniorEaseVoice.processVoiceCommand('call son')" data-i18n="cmd_family">"Call Family"</button>
+            <button class="voice-chip" onclick="SeniorEaseVoice.processVoiceCommand('setting')" data-i18n="cmd_settings">"Open Settings"</button>
+            <button class="voice-chip" onclick="SeniorEaseVoice.processVoiceCommand('tamil')" data-i18n="cmd_tamil">"Switch to Tamil"</button>
+            <button class="voice-chip" onclick="SeniorEaseVoice.processVoiceCommand('large text')" data-i18n="cmd_large">"Make Text Bigger"</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         7. DEDICATED ACCESSIBILITY SETTINGS PAGE
+         ======================================================================== -->
+    <section class="app-section" id="secSettings" aria-labelledby="settingsHeading">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <span style="font-size: 38px;" aria-hidden="true">⚙️</span>
+          <div>
+            <h2 id="settingsHeading" data-i18n="settings_sec_title">Accessibility & Personal Settings</h2>
+            <p class="section-desc" data-i18n="settings_sec_desc">Customize text size, high-contrast colors, voice guidance, and preferred language.</p>
+          </div>
+        </div>
+        <button class="btn-action-secondary" onclick="SeniorEaseA11y.resetDefaults()" data-i18n="btn_reset_defaults">
+          🔄 <span>Reset to Default Settings</span>
+        </button>
+      </div>
+
+      <!-- Setting A: Text Size -->
+      <div class="settings-card">
+        <h3 data-i18n="setting_text_size">A. Text Size</h3>
+        <p style="color: var(--text-muted); font-size: var(--font-size-base); font-weight: 500;" data-i18n="setting_text_size_desc">
+          Choose the font size that is most comfortable for your eyes.
+        </p>
+        <div class="settings-btn-group">
+          <button class="settings-opt-btn opt-text-size" data-val="0.85" onclick="SeniorEaseA11y.setFontScale(0.85)">
+            <span style="font-size: 0.9em;">A</span> <span data-i18n="font_small">Small (85%)</span>
+          </button>
+          <button class="settings-opt-btn opt-text-size active" data-val="1.0" onclick="SeniorEaseA11y.setFontScale(1.0)">
+            <span style="font-size: 1.05em;">A</span> <span data-i18n="font_normal">Normal (100%)</span>
+          </button>
+          <button class="settings-opt-btn opt-text-size" data-val="1.2" onclick="SeniorEaseA11y.setFontScale(1.2)">
+            <span style="font-size: 1.25em; font-weight: 800;">A+</span> <span data-i18n="font_large">Large (120%)</span>
+          </button>
+          <button class="settings-opt-btn opt-text-size" data-val="1.4" onclick="SeniorEaseA11y.setFontScale(1.4)">
+            <span style="font-size: 1.45em; font-weight: 900;">A++</span> <span data-i18n="font_xlarge">Extra Large (140%)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Setting B: High Contrast Mode -->
+      <div class="settings-card">
+        <h3 data-i18n="setting_contrast">B. High Contrast Mode</h3>
+        <p style="color: var(--text-muted); font-size: var(--font-size-base); font-weight: 500;" data-i18n="setting_contrast_desc">
+          Enhance readability with high-contrast pure black and bright yellow.
+        </p>
+        <div class="settings-btn-group">
+          <button class="settings-opt-btn opt-contrast active" data-val="default" onclick="SeniorEaseA11y.setTheme('default')">
+            <span>⚪ Light Glass (Default)</span>
+          </button>
+          <button class="settings-opt-btn opt-contrast" data-val="high-contrast" onclick="SeniorEaseA11y.setTheme('high-contrast')">
+            <span>🟡 High Contrast (Black & Yellow)</span>
+          </button>
+          <button class="settings-opt-btn opt-contrast" data-val="sepia" onclick="SeniorEaseA11y.setTheme('sepia')">
+            <span>🟤 Eye-Care Warm Amber (Sepia)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Setting C: Voice Assistance (Read Aloud) -->
+      <div class="settings-card">
+        <h3 data-i18n="setting_voice_guide">C. Voice Assistance (Read Aloud)</h3>
+        <p style="color: var(--text-muted); font-size: var(--font-size-base); font-weight: 500;" data-i18n="setting_voice_guide_desc">
+          SeniorEase will speak aloud page titles and important buttons.
+        </p>
+        <div class="settings-btn-group">
+          <button class="settings-opt-btn opt-voice-guide active" data-val="true" onclick="SeniorEaseA11y.setVoiceGuide(true)">
+            <span>🔊 <span data-i18n="btn_enable">Enable / ON</span></span>
+          </button>
+          <button class="settings-opt-btn opt-voice-guide" data-val="false" onclick="SeniorEaseA11y.setVoiceGuide(false)">
+            <span>🔇 <span data-i18n="btn_disable">Disable / OFF</span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Setting D: Voice Notifications -->
+      <div class="settings-card">
+        <h3 data-i18n="setting_voice_notifs">D. Voice Notifications</h3>
+        <p style="color: var(--text-muted); font-size: var(--font-size-base); font-weight: 500;" data-i18n="setting_voice_notifs_desc">
+          Spoken audio reminders when medication or appointment time arrives.
+        </p>
+        <div class="settings-btn-group">
+          <button class="settings-opt-btn opt-voice-notifs active" data-val="true" onclick="SeniorEaseA11y.setVoiceNotifs(true)">
+            <span>🔔 <span data-i18n="btn_enable">Enable / ON</span></span>
+          </button>
+          <button class="settings-opt-btn opt-voice-notifs" data-val="false" onclick="SeniorEaseA11y.setVoiceNotifs(false)">
+            <span>🔕 <span data-i18n="btn_disable">Disable / OFF</span></span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Setting E: Language -->
+      <div class="settings-card">
+        <h3 data-i18n="setting_lang">E. Language (மொழி)</h3>
+        <p style="color: var(--text-muted); font-size: var(--font-size-base); font-weight: 500;" data-i18n="setting_lang_desc">
+          Select between English and தமிழ் (Tamil).
+        </p>
+        <div class="settings-btn-group">
+          <button class="settings-opt-btn opt-lang active" data-val="en" onclick="SeniorEaseA11y.setLanguage('en')">
+            <span>🇬🇧 English</span>
+          </button>
+          <button class="settings-opt-btn opt-lang" data-val="ta" onclick="SeniorEaseA11y.setLanguage('ta')">
+            <span>🇮🇳 தமிழ் (Tamil)</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================================
+         8. EMERGENCY SOS SECTION
+         ======================================================================== -->
+    <section class="app-section" id="secEmergency" aria-labelledby="emergencyHeading">
+      <div class="sos-hero-card">
+        <h2 id="emergencyHeading" style="font-size: var(--font-size-3xl); font-weight: 900; margin-bottom: 10px;" data-i18n="sos_banner_title">🚨 EMERGENCY ASSISTANCE 🚨</h2>
+        <p style="font-size: var(--font-size-lg); max-width: 720px; margin: 0 auto; font-weight: 600;" data-i18n="sos_banner_desc">
+          Tap the big button below to trigger emergency alarm, broadcast your live GPS location, and alert emergency services.
+        </p>
+
+        <div>
+          <button class="sos-giant-button" onclick="SeniorEaseApp.triggerEmergencyProtocol()" aria-label="Trigger Emergency Alarm and SOS broadcast">
+            <span aria-hidden="true">🚨</span> <span data-i18n="sos_action_giant">PRESS FOR EMERGENCY HELP</span>
+          </button>
+        </div>
+
+        <div class="prototype-disclaimer-tag" data-i18n="sos_simulated_notice">
+          ⚠️ Student Prototype Notice: Emergency calls and GPS dispatches are simulated safely for demonstration.
+        </div>
+      </div>
+
+      <!-- Quick Emergency Direct Dial Cards -->
+      <h3 style="font-size: var(--font-size-xl); margin-bottom: 18px; font-weight: 900;" data-i18n="sos_direct_numbers">Quick Emergency Numbers:</h3>
+      <div class="emergency-quick-contacts">
+
+        <div class="emergency-call-card">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <span style="font-size: 44px;" aria-hidden="true">🚑</span>
+            <div>
+              <h4 style="font-size: var(--font-size-xl); font-weight: 900;" data-i18n="sos_ambulance_title">108 Ambulance</h4>
+              <p style="color: var(--text-muted); font-weight: 600;" data-i18n="sos_ambulance_desc">Free 24/7 Medical Emergency</p>
+            </div>
+          </div>
+          <button class="btn-action-primary" style="background: linear-gradient(135deg, var(--emergency) 0%, #B91C1C 100%);" onclick="SeniorEaseApp.simulateHospitalCall('108', '108 Ambulance Service')" data-i18n="btn_call_108">
+            📞 <span>Call 108 (Simulated)</span>
+          </button>
+        </div>
+
+        <div class="emergency-call-card">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <span style="font-size: 44px;" aria-hidden="true">👮</span>
+            <div>
+              <h4 style="font-size: var(--font-size-xl); font-weight: 900;" data-i18n="sos_police_title">112 National Helpline</h4>
+              <p style="color: var(--text-muted); font-weight: 600;" data-i18n="sos_police_desc">Police, Fire & All Emergencies</p>
+            </div>
+          </div>
+          <button class="btn-action-primary" style="background: linear-gradient(135deg, #1E3A8A 0%, #1E40AF 100%);" onclick="SeniorEaseContacts.simulateCall('112', '112 National Emergency Helpline')" data-i18n="btn_call_112">
+            📞 <span>Call 112 (Simulated)</span>
+          </button>
+        </div>
+
+        <div class="emergency-call-card">
+          <div style="display: flex; align-items: center; gap: 14px;">
+            <span style="font-size: 44px;" aria-hidden="true">👨‍👦</span>
+            <div>
+              <h4 style="font-size: var(--font-size-xl); font-weight: 900;" data-i18n="sos_primary_contact_title">Primary Family Contact</h4>
+              <p style="color: var(--text-muted); font-weight: 600;" data-i18n="sos_primary_contact_desc">Son: Ramesh (+91 98765 43210)</p>
+            </div>
+          </div>
+          <button class="btn-action-primary" style="background: linear-gradient(135deg, #059669 0%, #047857 100%);" onclick="SeniorEaseContacts.simulateCall('+919876543210', 'Ramesh (Son)')" data-i18n="btn_call_son">
+            📞 <span>Call Son (Simulated)</span>
+          </button>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       MODALS: EMERGENCY COUNTDOWN, BOOK APPOINTMENT, ADD MEDICINE, ADD REMINDER, ADD CONTACT, AUDIT
+       ========================================================================== -->
+
+  <!-- Emergency Countdown Modal -->
+  <div class="modal-overlay" id="modalEmergency" role="dialog" aria-modal="true" aria-labelledby="modalSosTitle">
+    <div class="modal-card" style="border: 4px solid var(--emergency); text-align: center;">
+      <h3 id="modalSosTitle" style="color: var(--emergency); font-size: var(--font-size-2xl); font-weight: 900;" data-i18n="sos_modal_title">
+        🚨 EMERGENCY ALERT ACTIVATED 🚨
+      </h3>
+      <p style="font-size: var(--font-size-lg); margin: 14px 0; font-weight: 600;" data-i18n="sos_modal_countdown_txt">
+        Dispatching simulated emergency alert in:
+      </p>
+
+      <div id="sosCountdownNumber" style="font-size: 80px; font-weight: 900; color: var(--emergency); margin: 10px 0; filter: drop-shadow(0 4px 12px rgba(220, 38, 38, 0.4));">5</div>
+
+      <div style="background: var(--glass-bg); backdrop-filter: blur(8px); padding: 18px; border-radius: 16px; margin: 16px 0; text-align: left; font-size: var(--font-size-sm); border: 2px solid var(--glass-border);">
+        <strong>📍 Simulated Location:</strong><br>
+        <span>13.0827° N, 80.2707° E (Chennai, Tamil Nadu)</span><br><br>
+        <strong>📡 Alert Recipient:</strong> 108 Ambulance Dispatch & Son (Ramesh)
+      </div>
+
+      <div style="display: flex; gap: 14px; margin-top: 24px; flex-wrap: wrap;">
+        <button class="btn-action-primary" style="background: #475569;" onclick="SeniorEaseApp.cancelEmergency()" data-i18n="sos_cancel_btn">
+          ❌ <span>Cancel Alert (Mistake)</span>
+        </button>
+        <button class="btn-action-primary" style="background: var(--emergency);" onclick="SeniorEaseApp.confirmEmergencyImmediately()" data-i18n="sos_confirm_now_btn">
+          🚨 <span>Send Alert NOW</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Book Appointment Modal -->
+  <div class="modal-overlay" id="modalBookAppt" role="dialog" aria-modal="true" aria-labelledby="modalBookTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalBookTitle" data-i18n="modal_book_heading">📅 Book Doctor Consultation</h3>
+        <button class="modal-close-btn" onclick="SeniorEaseApp.closeModal('modalBookAppt')" aria-label="Close dialog">✕</button>
+      </div>
+      <form onsubmit="SeniorEaseApp.saveAppointment(event)">
+        <div class="form-group">
+          <label for="bookDoctorSelect" data-i18n="lbl_select_doctor">Select Doctor:</label>
+          <select class="form-control" id="bookDoctorSelect" required>
+            <option value="Dr. K. Sundaram (General Physician - Apollo Clinic)">Dr. K. Sundaram (General Physician - Apollo Clinic)</option>
+            <option value="Dr. Radhika Krishnan (Heart Specialist - Fortis Hospital)">Dr. Radhika Krishnan (Heart Specialist - Fortis Hospital)</option>
+            <option value="Dr. R. Natarajan (Eye Specialist - Sankara Nethralaya)">Dr. R. Natarajan (Eye Specialist - Sankara Nethralaya)</option>
+            <option value="Dr. Meenakshi Sundaresan (Joint & Geriatric Specialist)">Dr. Meenakshi Sundaresan (Joint & Geriatric Specialist)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="bookDate" data-i18n="lbl_select_date">Choose Date:</label>
+          <input type="date" class="form-control" id="bookDate" required>
+        </div>
+        <div class="form-group">
+          <label for="bookSlot" data-i18n="lbl_select_slot">Preferred Time Slot:</label>
+          <select class="form-control" id="bookSlot">
+            <option value="Morning (10:00 AM)">🌅 Morning (10:00 AM)</option>
+            <option value="Morning (11:30 AM)">🌅 Morning (11:30 AM)</option>
+            <option value="Evening (05:00 PM)">🌆 Evening (05:00 PM)</option>
+            <option value="Evening (06:30 PM)">🌆 Evening (06:30 PM)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="bookNotes" data-i18n="lbl_symptoms">Main Problem or Symptoms (Optional):</label>
+          <input type="text" class="form-control" id="bookNotes" placeholder="e.g. Blood pressure checkup, Knee pain">
+        </div>
+        <button type="submit" class="btn-action-primary" style="width: 100%; margin-top: 14px;" data-i18n="btn_confirm_booking">
+          ✅ <span>Confirm & Add to My Schedule</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Medicine Modal -->
+  <div class="modal-overlay" id="modalAddMed" role="dialog" aria-modal="true" aria-labelledby="modalAddMedTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalAddMedTitle" data-i18n="modal_add_med_heading">💊 Add New Medicine</h3>
+        <button class="modal-close-btn" onclick="SeniorEaseApp.closeModal('modalAddMed')" aria-label="Close dialog">✕</button>
+      </div>
+      <form onsubmit="SeniorEaseMedicines.addMedicine(event)">
+        <div class="form-group">
+          <label for="medNameInput" data-i18n="lbl_med_name">Medicine / Tablet Name:</label>
+          <input type="text" class="form-control" id="medNameInput" placeholder="e.g. Telmisartan 40mg" required>
+        </div>
+        <div class="form-group">
+          <label for="medSlotSelect" data-i18n="lbl_med_time">Time of Day:</label>
+          <select class="form-control" id="medSlotSelect">
+            <option value="morning">🌅 Morning (After Breakfast - 8:30 AM)</option>
+            <option value="afternoon">☀️ Afternoon (After Lunch - 2:00 PM)</option>
+            <option value="night">🌙 Night (After Dinner - 8:30 PM)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="medDosageInput" data-i18n="lbl_med_dosage">Dosage Instructions:</label>
+          <input type="text" class="form-control" id="medDosageInput" placeholder="e.g. 1 Tablet with warm water" required>
+        </div>
+        <button type="submit" class="btn-action-primary" style="width: 100%; background: linear-gradient(135deg, var(--medicine) 0%, #047857 100%); margin-top: 14px;" data-i18n="btn_save_medicine">
+          💾 <span>Save Medicine Reminder</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Reminder Modal -->
+  <div class="modal-overlay" id="modalAddReminder" role="dialog" aria-modal="true" aria-labelledby="modalAddRemindTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalAddRemindTitle" data-i18n="modal_add_remind_heading">⏰ Add New Reminder</h3>
+        <button class="modal-close-btn" onclick="SeniorEaseApp.closeModal('modalAddReminder')" aria-label="Close dialog">✕</button>
+      </div>
+      <form onsubmit="SeniorEaseReminders.addReminder(event)">
+        <div class="form-group">
+          <label for="remindTitleInput" data-i18n="lbl_remind_title">Reminder Title:</label>
+          <input type="text" class="form-control" id="remindTitleInput" placeholder="e.g. Routine ECG Test or Call Daughter" required>
+        </div>
+        <div class="form-group">
+          <label for="remindTypeSelect" data-i18n="lbl_remind_type">Reminder Category:</label>
+          <select class="form-control" id="remindTypeSelect">
+            <option value="doctor">🩺 Doctor Visit</option>
+            <option value="test">🧪 Lab / Blood Test</option>
+            <option value="family">🎂 Family Event</option>
+            <option value="general">🔔 General Daily Task</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="remindDateInput" data-i18n="lbl_select_date">Choose Date:</label>
+          <input type="date" class="form-control" id="remindDateInput" required>
+        </div>
+        <div class="form-group">
+          <label for="remindTimeInput">Choose Time:</label>
+          <input type="time" class="form-control" id="remindTimeInput" value="10:00" required>
+        </div>
+        <button type="submit" class="btn-action-primary" style="width: 100%; background: linear-gradient(135deg, var(--reminder) 0%, #B45309 100%); margin-top: 14px;" data-i18n="btn_save_reminder">
+          💾 <span>Save Reminder</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Contact Modal -->
+  <div class="modal-overlay" id="modalAddContact" role="dialog" aria-modal="true" aria-labelledby="modalContactTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalContactTitle" data-i18n="modal_add_contact_heading">👨‍👩‍👧 Add Family / Caregiver Contact</h3>
+        <button class="modal-close-btn" onclick="SeniorEaseApp.closeModal('modalAddContact')" aria-label="Close dialog">✕</button>
+      </div>
+      <form onsubmit="SeniorEaseContacts.addContact(event)">
+        <div class="form-group">
+          <label for="contactNameInput" data-i18n="lbl_contact_name">Full Name & Relationship:</label>
+          <input type="text" class="form-control" id="contactNameInput" placeholder="e.g. Priya (Daughter) or Kumar (Neighbor)" required>
+        </div>
+        <div class="form-group">
+          <label for="contactPhoneInput" data-i18n="lbl_contact_phone">Phone Number:</label>
+          <input type="tel" class="form-control" id="contactPhoneInput" placeholder="e.g. +91 98765 00000" required>
+        </div>
+        <button type="submit" class="btn-action-primary" style="width: 100%; background: linear-gradient(135deg, var(--family) 0%, #6D28D9 100%); margin-top: 14px;" data-i18n="btn_save_contact">
+          💾 <span>Save Contact</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Senior Usability & Accessibility Testing Checklist Modal -->
+  <div class="modal-overlay" id="modalAudit" role="dialog" aria-modal="true" aria-labelledby="modalAuditTitle">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalAuditTitle">📋 SeniorEase Accessibility Audit Checklist</h3>
+        <button class="modal-close-btn" onclick="SeniorEaseApp.closeModal('modalAudit')" aria-label="Close dialog">✕</button>
+      </div>
+      <p style="font-size: var(--font-size-sm); color: var(--text-muted); margin-bottom: 16px; font-weight: 600;">
+        Interactive validation checklist for elderly accessibility and WCAG compliance:
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 14px;" id="auditTasksList">
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>1. Find Healthcare:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Can user locate doctor specialties and clinics in 1 click?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>2. Find a Hospital:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Can user find 24/7 hospitals with distance and direct call action?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>3. Add & Track Medicine:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Can user add tablet, mark taken/missed, and hear audio chime feedback?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>4. Set Reminders & Alarms:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Can user schedule reminders and test audio chime alarms?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>5. Contact Family Member:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Can user trigger one-tap call and quick safe SMS to loved ones?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>6. Emergency Help & Safety Countdown:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Can user trigger SOS with 5-second accidental click protection?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>7. Increase Text Size (85% to 140%):</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Does font scale immediately across all cards and forms?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>8. Enable High Contrast (Yellow/Black):</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Does entire theme transform to WCAG AAA contrast?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>9. Switch English / Tamil (தமிழ்):</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Does entire interface translate accurately into everyday Tamil?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>10. Voice Assistant Navigation:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Can user speak commands to open sections without typing?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>11. Keyboard Navigation & Focus Rings:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Are all controls accessible via Tab and Enter with clear focus?</div>
+          </div>
+        </label>
+        <label style="display: flex; align-items: flex-start; gap: 12px; padding: 12px; background: var(--glass-bg); border: 2px solid var(--glass-border); border-radius: 14px;">
+          <input type="checkbox" style="width: 26px; height: 26px; margin-top: 2px;">
+          <div>
+            <strong>12. Plain Language & Clear Feedback:</strong>
+            <div style="font-size: var(--font-size-sm); color: var(--text-muted);">Are technical terms completely avoided with clear confirmation toasts?</div>
+          </div>
+        </label>
+      </div>
+
+      <button class="btn-action-primary" style="width: 100%; margin-top: 20px;" onclick="SeniorEaseApp.closeModal('modalAudit')">
+        ✅ Done Reviewing Audit Checklist
+      </button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Feedback -->
+  <div class="toast-banner" id="toastBanner" role="status" aria-live="polite">
+    <span id="toastIcon">📢</span>
+    <span id="toastMessage">Welcome to SeniorEase!</span>
+  </div>
+
+  <!-- Floating Audit Checklist Trigger -->
+  <button class="audit-floating-btn" onclick="SeniorEaseApp.openModal('modalAudit')" aria-label="Open Accessibility Testing Checklist">
+    <span aria-hidden="true">📋</span> <span>Audit Checklist</span>
+  </button>
+
+  <!-- Load Modular Scripts -->
+  <script src="js/language.js"></script>
+  <script src="js/accessibility.js"></script>
+  <script src="js/voice.js"></script>
+  <script src="js/medicines.js"></script>
+  <script src="js/reminders.js"></script>
+  <script src="js/contacts.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/backend.js"></script>
+</body>
+</html>
