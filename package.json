@@ -1,0 +1,19 @@
+{
+  "name": "seniorease-team-health-app",
+  "version": "2.0.0",
+  "description": "SeniorEase Healthcare Assistant Application with FastAPI backend and accessible HTML/CSS/JS frontend",
+  "main": "main.py",
+  "scripts": {
+    "dev": "python -m uvicorn main:app --reload --port 8000",
+    "start": "python -m uvicorn main:app --port 8000",
+    "backend": "python -m uvicorn main:app --reload --port 8000"
+  },
+  "keywords": [
+    "seniorease",
+    "healthcare",
+    "fastapi",
+    "accessibility"
+  ],
+  "author": "",
+  "license": "MIT"
+}
