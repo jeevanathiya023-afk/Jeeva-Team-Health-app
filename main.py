@@ -4,9 +4,22 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime
-import sqlite3, json, math
+import os, shutil
+import sqlite3
+import math
+import json
 
-DB = "eldercare.db"
+DB_NAME = "eldercare.db"
+if os.environ.get("VERCEL") or os.environ.get("NOW_BUILDER"):
+    DB = f"/tmp/{DB_NAME}"
+    if not os.path.exists(DB) and os.path.exists(DB_NAME):
+        try:
+            shutil.copyfile(DB_NAME, DB)
+        except Exception:
+            pass
+else:
+    DB = DB_NAME
+
 app = FastAPI(title="ElderCare Healthcare Assistant API", version="2.0.0")
 
 app.add_middleware(
